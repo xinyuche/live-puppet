@@ -1,0 +1,25 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: live-puppet
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: live-puppet
+  template:
+    metadata:
+      labels:
+        app: live-puppet
+    spec:
+      containers:
+      - image: camillecxy/live-puppet:latest
+        imagePullPolicy: IfNotPresent
+        name: live-puppet
+        resources: {}
+        ports:
+        - containerPort: 8180
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+      - name: regcred

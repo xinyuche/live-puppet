@@ -1,7 +1,6 @@
 FROM golang:1-alpine as build
 
 WORKDIR /app
-COPY cmd cmd
 RUN go build -o /live-puppet
 
 FROM alpine:latest
