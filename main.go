@@ -39,6 +39,7 @@ func handleRequest(conn net.Conn) {
 	buf := make([]byte, 1024)
 	// Read the incoming connection into the buffer.
 	_, err := conn.Read(buf)
+	log.Printf("received: %s", string(buf[:]))
 	if err != nil {
 		log.Printf("Error reading: %s", err.Error())
 	}
