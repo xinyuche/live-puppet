@@ -3,6 +3,8 @@ package main
 import (
 	"log"
 	"net"
+	"os"
+	"time"
 )
 
 const (
@@ -20,8 +22,32 @@ func main() {
 		return
 	}
 
+	ticker := time.NewTicker(1000 * time.Millisecond)
+	log.Println("Start Heartbeat ticker")
+	done := make(chan bool)
+	go func() {
+		for {
+			select {
+			case <-done:
+				hbl.Close()
+				log.Println("Heartbeat listener closed")
+				os.Exit(0)
+				return
+			case t := <-ticker.C:
+				log.Println("Tick at", t)
+			}
+		}
+	}()
+
+	go func() {
+		time.Sleep(10000 * time.Millisecond)
+		ticker.Stop()
+		done <- true
+		log.Println("Ticker stopped")
+	}()
+
 	// Close the heartbeat listener when the application closes.
-	defer hbl.Close()
+	// defer hbl.Close()
 
 	for {
 		// Listen for an incoming connection for Heartbeat.
