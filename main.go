@@ -4,6 +4,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"time"
 )
 
 const (
@@ -27,7 +28,7 @@ func main() {
 		return
 	}
 	// Close the heartbeat listener when the application closes.
-	defer hbl.Close()
+	// defer hbl.Close()
 	// Close the operation listener when the application closes.
 	defer opl.Close()
 
@@ -57,6 +58,11 @@ func main() {
 			go handleOperation(opconn)
 		}
 	}()
+
+	time.Sleep(30 * time.Second)
+	log.Println("heartbeat listener closed")
+	hbl.Close()
+	time.Sleep(30 * time.Second)
 }
 
 // Handles incoming requests.
