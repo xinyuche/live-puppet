@@ -23,19 +23,17 @@ func main() {
 	// Close the operation listener when the application closes.
 	defer ctllistener.Close()
 
-	go func() {
-		for {
-			// Listen for an incoming connection for Heartbeat.
-			ctlconn, err := ctllistener.Accept()
-			if err != nil {
-				log.Printf("Error accepting control signal: %s", err.Error())
-				return
-			}
-			log.Printf("Listening on control port " + CONN_HOST + ":" + CONTROL_PORT)
-			// Handle connections in a new goroutine.
-			go handleControlSignal(ctlconn)
+	for {
+		// Listen for an incoming connection for Heartbeat.
+		ctlconn, err := ctllistener.Accept()
+		if err != nil {
+			log.Printf("Error accepting control signal: %s", err.Error())
+			return
 		}
-	}()
+		log.Printf("Listening on control port " + CONN_HOST + ":" + CONTROL_PORT)
+		// Handle connections in a new goroutine.
+		go handleControlSignal(ctlconn)
+	}
 }
 
 // Handles incoming requests.
