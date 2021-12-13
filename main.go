@@ -13,7 +13,7 @@ const (
 )
 
 func main() {
-	log.Println("Start Control Port")
+	log.Println("Start Control Container")
 	// Listen for incoming connections for operation.
 	ctllistener, err := net.Listen(CONN_TYPE, CONN_HOST+":"+CONTROL_PORT)
 	if err != nil {
