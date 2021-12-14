@@ -5,12 +5,12 @@ metadata:
   namespace: default
 spec:
   containers:
-  - image: camillecxy/live-puppet:oneport4
+  - image: camillecxy/live-puppet:oneport5
     imagePullPolicy: IfNotPresent
     name: live-puppet
     resources: {}
     ports:
-    - containerPort: 32505
+    - containerPort: 32504
   dnsPolicy: ClusterFirst
   restartPolicy: Always
   nodeSelector:
