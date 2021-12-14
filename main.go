@@ -1,10 +1,10 @@
 package main
 
 import (
-	"bytes"
 	"log"
 	"net"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -15,7 +15,7 @@ const (
 )
 
 func main() {
-	log.Println("Start Heartbeat Container with update 6")
+	log.Println("Start Heartbeat Container with update 7")
 
 	// Listen for incoming connections for heartbeat.
 	hbl, err := net.Listen(CONN_TYPE, CONN_HOST+":"+HB_PORT)
@@ -27,7 +27,7 @@ func main() {
 	// rangeUpper := 30
 
 	// liveDuration := rangeLower + rand.Intn(rangeUpper-rangeLower+1)
-	liveDuration := 200
+	liveDuration := 120
 	starttime := time.Now()
 	log.Printf("Time Duration: %v", liveDuration)
 
@@ -52,9 +52,8 @@ func handleHeartbeat(conn net.Conn, starttime time.Time, duration int) {
 	buf := make([]byte, 1024)
 	// Read the incoming connection into the buffer.
 	_, err := conn.Read(buf)
-	receivedMsg := string(buf[:])
-	// isHeartbeatMsg := strings.Compare(receivedMsg, "heartbeat")
-	isHeartbeatMsg := bytes.Compare(buf, []byte("heartbeat"))
+	receivedMsg := string(buf[:9])
+	isHeartbeatMsg := strings.Compare(receivedMsg, "heartbeat")
 	log.Printf("IsHeartbeatMSG: %v", isHeartbeatMsg)
 	log.Printf("Received: %s", receivedMsg)
 	if err != nil {
