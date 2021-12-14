@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"math/rand"
 	"net"
 	"os"
 	"strings"
@@ -15,7 +16,7 @@ const (
 )
 
 func main() {
-	log.Println("Start Heartbeat Container with update 7")
+	log.Println("Start Heartbeat Container with update 8")
 
 	// Listen for incoming connections for heartbeat.
 	hbl, err := net.Listen(CONN_TYPE, CONN_HOST+":"+HB_PORT)
@@ -23,13 +24,34 @@ func main() {
 		log.Printf("Error heartbeat listening: %s", err.Error())
 		return
 	}
-	// rangeLower := 10
-	// rangeUpper := 30
+	log.Printf("Listening on Heartbeat Port " + CONN_HOST + ":" + HB_PORT)
 
-	// liveDuration := rangeLower + rand.Intn(rangeUpper-rangeLower+1)
-	liveDuration := 120
+	rangeLower := 70
+	rangeUpper := 120
+
+	liveDuration := rangeLower + rand.Intn(rangeUpper-rangeLower+1)
 	starttime := time.Now()
-	log.Printf("Time Duration: %v", liveDuration)
+	log.Printf("Liveness Duration: %v seconds", liveDuration)
+
+	livenessAlarm := time.NewTicker(1 * time.Second)
+	done := make(chan bool)
+	go func(t *time.Ticker) {
+		for {
+			select {
+			case <-done:
+				return
+			case <-livenessAlarm.C:
+				log.Println("Still Alive")
+			}
+		}
+	}(livenessAlarm)
+
+	go func(liveDuration int, t *time.Ticker, c chan bool) {
+		time.Sleep(time.Duration(liveDuration) * time.Second)
+		t.Stop()
+		done <- true
+		log.Println("Dead")
+	}(liveDuration, livenessAlarm, done)
 
 	for {
 		// Listen for an incoming connection for Heartbeat.
@@ -38,11 +60,10 @@ func main() {
 			log.Printf("Error accepting Heartbeat: %s", err.Error())
 			return
 		}
-		log.Printf("Listening on Heartbeat Port " + CONN_HOST + ":" + HB_PORT)
+
 		// Handle connections in a new goroutine.
 		go handleHeartbeat(hbconn, starttime, liveDuration)
 	}
-
 }
 
 // Handles incoming requests.
@@ -54,7 +75,7 @@ func handleHeartbeat(conn net.Conn, starttime time.Time, duration int) {
 	_, err := conn.Read(buf)
 	receivedMsg := string(buf[:9])
 	isHeartbeatMsg := strings.Compare(receivedMsg, "heartbeat")
-	log.Printf("IsHeartbeatMSG: %v", isHeartbeatMsg)
+	// log.Printf("IsHeartbeatMSG: %v", isHeartbeatMsg)
 	log.Printf("Received: %s", receivedMsg)
 	if err != nil {
 		log.Printf("Error reading: %s", err.Error())
