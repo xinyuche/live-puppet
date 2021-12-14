@@ -15,7 +15,7 @@ const (
 )
 
 func main() {
-	log.Println("Start Heartbeat Container with update 5")
+	log.Println("Start Heartbeat Container with update 6")
 
 	// Listen for incoming connections for heartbeat.
 	hbl, err := net.Listen(CONN_TYPE, CONN_HOST+":"+HB_PORT)
@@ -54,7 +54,7 @@ func handleHeartbeat(conn net.Conn, starttime time.Time, duration int) {
 	_, err := conn.Read(buf)
 	receivedMsg := string(buf[:])
 	// isHeartbeatMsg := strings.Compare(receivedMsg, "heartbeat")
-	isHeartbeatMsg := bytes.Compare(buf, []byte("failed"))
+	isHeartbeatMsg := bytes.Compare(buf, []byte("heartbeat"))
 	log.Printf("IsHeartbeatMSG: %v", isHeartbeatMsg)
 	log.Printf("Received: %s", receivedMsg)
 	if err != nil {
