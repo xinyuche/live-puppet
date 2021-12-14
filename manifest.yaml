@@ -14,12 +14,12 @@ spec:
         app: live-puppet
     spec:
       containers:
-      - image: camillecxy/live-puppet:latest
+      - image: camillecxy/live-puppet:tcp32504
         imagePullPolicy: IfNotPresent
         name: live-puppet
         resources: {}
         ports:
-        - containerPort: 8180
+        - containerPort: 32504
       dnsPolicy: ClusterFirst
       imagePullSecrets:
       - name: regcred

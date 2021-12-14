@@ -1,0 +1,19 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: live-puppet-m02
+  namespace: default
+spec:
+  containers:
+  - image: camillecxy/live-puppet:singleport
+    imagePullPolicy: IfNotPresent
+    name: live-puppet
+    resources: {}
+    ports:
+    - containerPort: 32505
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+  nodeSelector:
+    nodenum: m02
+  imagePullSecrets:
+  - name: regcred

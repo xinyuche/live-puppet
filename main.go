@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"math/rand"
 	"net"
 	"os"
 	"time"
@@ -15,39 +16,19 @@ const (
 
 func main() {
 	log.Println("Start Heartbeat Container")
+
 	// Listen for incoming connections for heartbeat.
 	hbl, err := net.Listen(CONN_TYPE, CONN_HOST+":"+HB_PORT)
 	if err != nil {
 		log.Printf("Error heartbeat listening: %s", err.Error())
 		return
 	}
+	rangeLower := 10
+	rangeUpper := 30
 
-	ticker := time.NewTicker(1000 * time.Millisecond)
-	log.Println("Start Heartbeat ticker")
-	done := make(chan bool)
-	go func() {
-		for {
-			select {
-			case <-done:
-				hbl.Close()
-				log.Println("Heartbeat listener closed")
-				os.Exit(0)
-				return
-			case t := <-ticker.C:
-				log.Println("Tick at", t)
-			}
-		}
-	}()
-
-	go func() {
-		time.Sleep(10000 * time.Millisecond)
-		ticker.Stop()
-		done <- true
-		log.Println("Ticker stopped")
-	}()
-
-	// Close the heartbeat listener when the application closes.
-	// defer hbl.Close()
+	liveDuration := rangeLower + rand.Intn(rangeUpper-rangeLower+1)
+	starttime := time.Now()
+	log.Println("Time Duration: &v + 10", liveDuration)
 
 	for {
 		// Listen for an incoming connection for Heartbeat.
@@ -58,23 +39,49 @@ func main() {
 		}
 		log.Printf("Listening on Heartbeat Port " + CONN_HOST + ":" + HB_PORT)
 		// Handle connections in a new goroutine.
-		go handleHeartbeat(hbconn)
+		go handleHeartbeat(hbconn, starttime, liveDuration)
 	}
 
 }
 
 // Handles incoming requests.
-func handleHeartbeat(conn net.Conn) {
+func handleHeartbeat(conn net.Conn, starttime time.Time, duration int) {
+	curtime := time.Now()
 	// Make a buffer to hold incoming data.
 	buf := make([]byte, 1024)
 	// Read the incoming connection into the buffer.
 	_, err := conn.Read(buf)
-	log.Printf("Received Heartbeat: %s", string(buf[:]))
+	log.Printf("Received: %s", string(buf[:]))
 	if err != nil {
 		log.Printf("Error reading: %s", err.Error())
 	}
-	// Send a response back to person contacting us.
-	conn.Write([]byte("Heartbeat received."))
-	// Close the connection when you're done with it.
+	if string(buf[:]) == "heartbeat" {
+		heartbeatResponser(starttime, curtime, duration, conn)
+	} else {
+		controlResponser(conn)
+	}
+}
+
+func heartbeatResponser(starttime time.Time, curtime time.Time, liveDuration int, conn net.Conn) {
+	log.Println("In heartbeat responser.")
+	deadPuppet := curtime.After(starttime.Add(time.Duration(liveDuration) * time.Second))
+	log.Printf("DeadPuppet: %v", deadPuppet)
+	if !deadPuppet {
+		conn.Write([]byte("heartbeat received"))
+		log.Println("Response: heartbeat received")
+		conn.Close()
+	} else {
+		conn.Write([]byte("failed"))
+		log.Println("Response: failed")
+		conn.Close()
+	}
+}
+
+func controlResponser(conn net.Conn) {
+	log.Println("In control responser.")
+	log.Println("Response: Control signal received")
+	conn.Write([]byte("Control signal received."))
 	conn.Close()
+	log.Println("sending os.exit(1)")
+	os.Exit(1)
 }
