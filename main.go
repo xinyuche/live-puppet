@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"math/rand"
 	"net"
 	"os"
 	"time"
@@ -15,7 +14,7 @@ const (
 )
 
 func main() {
-	log.Println("Start Heartbeat Container")
+	log.Println("Start Heartbeat Container with update 1")
 
 	// Listen for incoming connections for heartbeat.
 	hbl, err := net.Listen(CONN_TYPE, CONN_HOST+":"+HB_PORT)
@@ -23,12 +22,13 @@ func main() {
 		log.Printf("Error heartbeat listening: %s", err.Error())
 		return
 	}
-	rangeLower := 10
-	rangeUpper := 30
+	// rangeLower := 10
+	// rangeUpper := 30
 
-	liveDuration := rangeLower + rand.Intn(rangeUpper-rangeLower+1)
+	// liveDuration := rangeLower + rand.Intn(rangeUpper-rangeLower+1)
+	liveDuration := 30
 	starttime := time.Now()
-	log.Println("Time Duration: &v + 10", liveDuration)
+	log.Printf("Time Duration: %v", liveDuration)
 
 	for {
 		// Listen for an incoming connection for Heartbeat.
@@ -64,9 +64,10 @@ func handleHeartbeat(conn net.Conn, starttime time.Time, duration int) {
 
 func heartbeatResponser(starttime time.Time, curtime time.Time, liveDuration int, conn net.Conn) {
 	log.Println("In heartbeat responser.")
-	deadPuppet := curtime.After(starttime.Add(time.Duration(liveDuration) * time.Second))
-	log.Printf("DeadPuppet: %v", deadPuppet)
-	if !deadPuppet {
+	targetTime := starttime.Add(time.Duration(liveDuration) * time.Second)
+	alive := curtime.Before(targetTime)
+	log.Printf("Liveness: %v", alive)
+	if alive {
 		conn.Write([]byte("heartbeat received"))
 		log.Println("Response: heartbeat received")
 		conn.Close()
