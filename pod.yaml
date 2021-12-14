@@ -5,7 +5,7 @@ metadata:
   namespace: default
 spec:
   containers:
-  - image: camillecxy/live-puppet:oneport2
+  - image: camillecxy/live-puppet:oneport4
     imagePullPolicy: IfNotPresent
     name: live-puppet
     resources: {}
