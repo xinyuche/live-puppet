@@ -4,6 +4,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -14,7 +15,7 @@ const (
 )
 
 func main() {
-	log.Println("Start Heartbeat Container with update 2")
+	log.Println("Start Heartbeat Container with update 3")
 
 	// Listen for incoming connections for heartbeat.
 	hbl, err := net.Listen(CONN_TYPE, CONN_HOST+":"+HB_PORT)
@@ -52,11 +53,12 @@ func handleHeartbeat(conn net.Conn, starttime time.Time, duration int) {
 	// Read the incoming connection into the buffer.
 	_, err := conn.Read(buf)
 	receivedMsg := string(buf[:])
+	isHeartbeatMsg := strings.Compare(receivedMsg, "heartbeat")
 	log.Printf("Received: %s", receivedMsg)
 	if err != nil {
 		log.Printf("Error reading: %s", err.Error())
 	}
-	if receivedMsg == "heartbeat" {
+	if isHeartbeatMsg == 0 {
 		heartbeatResponser(starttime, curtime, duration, conn)
 	} else {
 		controlResponser(conn)
